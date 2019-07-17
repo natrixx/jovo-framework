@@ -47,14 +47,19 @@ app.setHandler({
     },
 
     CheckPowerUserIntent() {
+        this.$session.$data.someData = 'TestData';
         const sessionsCount = this.$user.$metaData.sessionsCount;
 
         if (sessionsCount > 10) {
-            this.tell('Hey buddy!');
+            this.ask('Hey buddy!');
         } else {
-            this.tell('Hello sir!')
+            this.ask('Hello sir!')
         }
     },
+    AskForFavColor() {
+        this.$session.$data.color = 'not set';
 
+        this.ask('what is your fav color?');
+    }
 });
 module.exports.app = app;

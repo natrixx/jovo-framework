@@ -5,160 +5,104 @@ const { Alexa } = require('jovo-platform-alexa');
 // jest.setTimeout(500);
 
 
-for (const p of [new Alexa(), new GoogleAssistant()]) {
+for (const p of [new Alexa, new GoogleAssistant()]) {
     const testSuite = p.makeTestSuite();
 
     describe(`PLATFORM: ${p.constructor.name} INTENTS` , () => {
-        test('should return a welcome message and ask for the name at "LAUNCH"', async () => {
-            const conversation = testSuite.conversation({
-                runtime: "app"
+        describe('when using runtime: "app" ' , () => {
+            test('session data "someData" should not be in first response', async () => {
+                const conversation = testSuite.conversation({
+                    runtime: "app"
+                });
+
+                const launchRequest = await testSuite.requestBuilder.intent('HelloWorldIntent');
+                const responseLaunchRequest = await conversation.send(launchRequest);
+
+                const launchRequest2 = await testSuite.requestBuilder.intent('CheckPowerUserIntent');
+                const responseLaunchRequest2 = await conversation.send(launchRequest2);
+
+                expect(
+                    responseLaunchRequest.hasSessionData('someData')
+                ).toBe(false);
+
+
+                expect(
+                    responseLaunchRequest2.hasSessionData('someData')
+                ).toBe(true);
             });
 
-            const launchRequest = await testSuite.requestBuilder.launch();
+            test('session data "color" should only be in third response', async () => {
+                const conversation = testSuite.conversation({
+                    runtime: "app"
+                });
 
-            const responseLaunchRequest = await conversation.send(launchRequest);
+                const launchRequest = await testSuite.requestBuilder.intent('HelloWorldIntent');
+                const responseLaunchRequest = await conversation.send(launchRequest);
 
-            expect(
-                responseLaunchRequest.isAsk('Hello World! What\'s your name?', 'Please tell me your name.')
-            ).toBe(true);
+                const launchRequest2 = await testSuite.requestBuilder.intent('CheckPowerUserIntent');
+                const responseLaunchRequest2 = await conversation.send(launchRequest2);
 
+                const launchRequest3 = await testSuite.requestBuilder.intent('AskForFavColor');
+                const responseLaunchRequest3 = await conversation.send(launchRequest3);
+
+                expect(
+                    responseLaunchRequest.hasSessionData('color')
+                ).toBe(false);
+
+                expect(
+                    responseLaunchRequest2.hasSessionData('color')
+                ).toBe(false);
+
+                expect(
+                    responseLaunchRequest3.hasSessionData('color')
+                ).toBe(true);
+            });
         });
 
-        test('should return a welcome message and ask for the name at "HelloWorldIntent"', async () => {
-            const conversation = testSuite.conversation({
-                runtime: "app"
+        describe('when not using runtime: "app" ' , () => {
+            test('session data "someData" should not be in first response', async () => {
+                const conversation = testSuite.conversation();
+
+                const launchRequest = await testSuite.requestBuilder.intent('HelloWorldIntent');
+                const responseLaunchRequest = await conversation.send(launchRequest);
+
+                const launchRequest2 = await testSuite.requestBuilder.intent('CheckPowerUserIntent');
+                const responseLaunchRequest2 = await conversation.send(launchRequest2);
+
+                expect(
+                    responseLaunchRequest.hasSessionData('someData')
+                ).toBe(false);
+
+
+                expect(
+                    responseLaunchRequest2.hasSessionData('someData')
+                ).toBe(true);
             });
 
-            const intentRequest = await testSuite.requestBuilder.intent();
+            test('session data "color" should only be in third response', async () => {
+                const conversation = testSuite.conversation();
 
-            intentRequest.setIntentName('HelloWorldIntent');
-            intentRequest.setNewSession(true);
+                const launchRequest = await testSuite.requestBuilder.intent('HelloWorldIntent');
+                const responseLaunchRequest = await conversation.send(launchRequest);
 
-            const responseIntentRequest = await conversation.send(intentRequest);
+                const launchRequest2 = await testSuite.requestBuilder.intent('CheckPowerUserIntent');
+                const responseLaunchRequest2 = await conversation.send(launchRequest2);
 
-            expect(
-                responseIntentRequest.isAsk('Hello World! What\'s your name?', 'Please tell me your name.')
-            ).toBe(true);
-            await conversation.clearDb();
+                const launchRequest3 = await testSuite.requestBuilder.intent('AskForFavColor');
+                const responseLaunchRequest3 = await conversation.send(launchRequest3);
 
-        });
+                expect(
+                    responseLaunchRequest.hasSessionData('color')
+                ).toBe(false);
 
-        test('should greet the user with their name at "MyNameIsIntent"', async () => {
-            const conversation = testSuite.conversation({
-                runtime: "app"
+                expect(
+                    responseLaunchRequest2.hasSessionData('color')
+                ).toBe(false);
+
+                expect(
+                    responseLaunchRequest3.hasSessionData('color')
+                ).toBe(true);
             });
-
-            // MyNameIsIntent (one shot) => name=Joe
-            const intentRequest = await testSuite.requestBuilder.intent('MyNameIsIntent', { name: 'Joe' });
-            intentRequest.setNewSession(true);
-            const responseIntentRequest = await conversation.send(intentRequest);
-            expect(
-                responseIntentRequest.isTell('Hey Joe, nice to meet you!')
-            ).toBe(true);
-            await conversation.clearDb();
-
-        });
-    });
-    describe(`PLATFORM: ${p.constructor.name} CONVERSATIONS` , () => {
-        test('should run the whole conversation flow and greet the user with the correct name', async () => {
-            const conversation = testSuite.conversation({
-                runtime: "app"
-            });
-
-            // LAUNCH
-            const launchRequest = await testSuite.requestBuilder.launch();
-            const responseLaunchRequest = await conversation.send(launchRequest);
-            expect(
-                responseLaunchRequest.isAsk('Hello World! What\'s your name?', 'Please tell me your name.')
-            ).toBe(true);
-
-            // MyNameIsIntent => name=Joe
-            const intentRequest = await testSuite.requestBuilder.intent('MyNameIsIntent', { name: 'Joe' });
-            const responseIntentRequest = await conversation.send(intentRequest);
-            expect(
-                responseIntentRequest.isTell('Hey Joe, nice to meet you!')
-            ).toBe(true);
-
-
-        });
-
-
-        test('should ask for the name again if user responds with something else', async () => {
-            const conversation = testSuite.conversation({
-                runtime: "app"
-            });
-
-            // LAUNCH
-            const launchRequest = await testSuite.requestBuilder.launch();
-            const responseLaunchRequest = await conversation.send(launchRequest);
-            expect(
-                responseLaunchRequest.isAsk('Hello World! What\'s your name?', 'Please tell me your name.')
-            ).toBe(true);
-
-            // HelloWorldIntent
-            const intentRequest = await testSuite.requestBuilder.intent('HelloWorldIntent');
-            const responseIntentRequest = await conversation.send(intentRequest);
-            expect(
-                responseIntentRequest.isAsk('Hello World! What\'s your name?', 'Please tell me your name.')
-            ).toBe(true);
-        });
-    });
-
-    describe(`PLATFORM: ${p.constructor.name} DATABASE` , () => {
-        test('should return the name that is stored in the database', async () => {
-            const conversation = testSuite.conversation({
-                runtime: "app"
-            });
-
-            // LAUNCH
-            const launchRequest = await testSuite.requestBuilder.launch();
-            const responseLaunchRequest = await conversation.send(launchRequest);
-            expect(
-                responseLaunchRequest.isAsk('Hello World! What\'s your name?', 'Please tell me your name.')
-            ).toBe(true);
-
-            // MyNameIsIntent => name=Joe
-            const intentRequest = await testSuite.requestBuilder.intent('MyNameIsIntent', { name: 'Joe' });
-            const responseIntentRequest = await conversation.send(intentRequest);
-            expect(
-                responseIntentRequest.isTell('Hey Joe, nice to meet you!')
-            ).toBe(true);
-
-            expect(conversation.$user.$data.name).toEqual('Joe');
-
-        });
-        test('should return the name that is stored from the test', async () => {
-            const conversation = testSuite.conversation({
-                runtime: "app"
-            });
-            conversation.$user.$data.name = 'Jeff';
-            const intentRequest = await testSuite.requestBuilder.intent('NameFromDbIntent');
-            const responseIntentRequest = await conversation.send(intentRequest);
-            expect(
-                responseIntentRequest.isTell('Hey Jeff, nice to meet you!')
-            ).toBe(true);
-
-        });
-
-        test('should update metaData', async () => {
-            const conversation = testSuite.conversation({
-                runtime: "app"
-            });
-            const intentRequest = await testSuite.requestBuilder.intent('CheckPowerUserIntent');
-            const responseIntentRequest = await conversation.send(intentRequest);
-            expect(
-                responseIntentRequest.isTell('Hello sir!')
-            ).toBe(true);
-
-
-            conversation.$user.$metaData.sessionsCount = 20;
-            const intentRequest2 = await testSuite.requestBuilder.intent('CheckPowerUserIntent');
-            const responseIntentRequest2 = await conversation.send(intentRequest2);
-            expect(
-                responseIntentRequest2.isTell('Hey buddy!')
-            ).toBe(true);
-
         });
     });
-
 }
