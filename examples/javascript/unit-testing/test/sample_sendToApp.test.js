@@ -5,102 +5,110 @@ const { Alexa } = require('jovo-platform-alexa');
 // jest.setTimeout(500);
 
 
-for (const p of [new Alexa, new GoogleAssistant()]) {
+for (const p of [new Alexa(), new GoogleAssistant()]) {
     const testSuite = p.makeTestSuite();
 
     describe(`PLATFORM: ${p.constructor.name} INTENTS` , () => {
         describe('when using runtime: "app" ' , () => {
-            test('session data "someData" should not be in first response', async () => {
+            beforeAll(async () => {
                 const conversation = testSuite.conversation({
                     runtime: "app"
                 });
 
                 const launchRequest = await testSuite.requestBuilder.intent('HelloWorldIntent');
-                const responseLaunchRequest = await conversation.send(launchRequest);
+                global.responseLaunchRequest = await conversation.send(launchRequest);
 
                 const launchRequest2 = await testSuite.requestBuilder.intent('CheckPowerUserIntent');
-                const responseLaunchRequest2 = await conversation.send(launchRequest2);
+                global.responseLaunchRequest2 = await conversation.send(launchRequest2);
 
+                const launchRequest3 = await testSuite.requestBuilder.intent('AskForFavColor');
+                global.responseLaunchRequest3 = await conversation.send(launchRequest3);
+            });
+
+            test('first response does NOT have "someData"', async () => {
                 expect(
-                    responseLaunchRequest.hasSessionData('someData')
+                    global.responseLaunchRequest.hasSessionData('someData')
                 ).toBe(false);
+            });
 
-
+            test('first response does NOT have "color"', async () => {
                 expect(
-                    responseLaunchRequest2.hasSessionData('someData')
+                    global.responseLaunchRequest.hasSessionData('color')
+                ).toBe(false);
+            });
+
+            test('second response does have "someData"', async () => {
+                expect(
+                    global.responseLaunchRequest2.hasSessionData('someData')
                 ).toBe(true);
             });
 
-            test('session data "color" should only be in third response', async () => {
-                const conversation = testSuite.conversation({
-                    runtime: "app"
-                });
-
-                const launchRequest = await testSuite.requestBuilder.intent('HelloWorldIntent');
-                const responseLaunchRequest = await conversation.send(launchRequest);
-
-                const launchRequest2 = await testSuite.requestBuilder.intent('CheckPowerUserIntent');
-                const responseLaunchRequest2 = await conversation.send(launchRequest2);
-
-                const launchRequest3 = await testSuite.requestBuilder.intent('AskForFavColor');
-                const responseLaunchRequest3 = await conversation.send(launchRequest3);
-
+            test('second response does NOT have "color"', async () => {
                 expect(
-                    responseLaunchRequest.hasSessionData('color')
+                    global.responseLaunchRequest2.hasSessionData('color')
                 ).toBe(false);
+            });
 
+            test('third response does have "someData"', async () => {
                 expect(
-                    responseLaunchRequest2.hasSessionData('color')
-                ).toBe(false);
+                    global.responseLaunchRequest3.hasSessionData('someData')
+                ).toBe(true);
+            });
 
+            test('third response does have "color"', async () => {
                 expect(
-                    responseLaunchRequest3.hasSessionData('color')
+                    global.responseLaunchRequest3.hasSessionData('color')
                 ).toBe(true);
             });
         });
 
-        describe('when not using runtime: "app" ' , () => {
-            test('session data "someData" should not be in first response', async () => {
+        describe('when NOT using runtime: "app" ' , () => {
+            beforeAll(async () => {
                 const conversation = testSuite.conversation();
 
                 const launchRequest = await testSuite.requestBuilder.intent('HelloWorldIntent');
-                const responseLaunchRequest = await conversation.send(launchRequest);
+                global.responseLaunchRequest = await conversation.send(launchRequest);
 
                 const launchRequest2 = await testSuite.requestBuilder.intent('CheckPowerUserIntent');
-                const responseLaunchRequest2 = await conversation.send(launchRequest2);
+                global.responseLaunchRequest2 = await conversation.send(launchRequest2);
 
+                const launchRequest3 = await testSuite.requestBuilder.intent('AskForFavColor');
+                global.responseLaunchRequest3 = await conversation.send(launchRequest3);
+            });
+
+            test('first response does NOT have "someData"', async () => {
                 expect(
-                    responseLaunchRequest.hasSessionData('someData')
+                    global.responseLaunchRequest.hasSessionData('someData')
                 ).toBe(false);
+            });
 
-
+            test('first response does NOT have "color"', async () => {
                 expect(
-                    responseLaunchRequest2.hasSessionData('someData')
+                    global.responseLaunchRequest.hasSessionData('color')
+                ).toBe(false);
+            });
+
+            test('second response does have "someData"', async () => {
+                expect(
+                    global.responseLaunchRequest2.hasSessionData('someData')
                 ).toBe(true);
             });
 
-            test('session data "color" should only be in third response', async () => {
-                const conversation = testSuite.conversation();
-
-                const launchRequest = await testSuite.requestBuilder.intent('HelloWorldIntent');
-                const responseLaunchRequest = await conversation.send(launchRequest);
-
-                const launchRequest2 = await testSuite.requestBuilder.intent('CheckPowerUserIntent');
-                const responseLaunchRequest2 = await conversation.send(launchRequest2);
-
-                const launchRequest3 = await testSuite.requestBuilder.intent('AskForFavColor');
-                const responseLaunchRequest3 = await conversation.send(launchRequest3);
-
+            test('second response does NOT have "color"', async () => {
                 expect(
-                    responseLaunchRequest.hasSessionData('color')
+                    global.responseLaunchRequest2.hasSessionData('color')
                 ).toBe(false);
+            });
 
+            test('third response does have "someData"', async () => {
                 expect(
-                    responseLaunchRequest2.hasSessionData('color')
-                ).toBe(false);
+                    global.responseLaunchRequest3.hasSessionData('someData')
+                ).toBe(true);
+            });
 
+            test('third response does have "color"', async () => {
                 expect(
-                    responseLaunchRequest3.hasSessionData('color')
+                    global.responseLaunchRequest3.hasSessionData('color')
                 ).toBe(true);
             });
         });
