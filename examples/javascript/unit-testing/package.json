@@ -13,6 +13,7 @@
   "author": "jovotech",
   "license": "Apache-2.0",
   "dependencies": {
+    "jovo-cms-googlesheets": "^2.2.13",
     "jovo-db-filedb": "^2.2.10",
     "jovo-framework": "^2.2.13",
     "jovo-platform-alexa": "^2.2.15",
