@@ -23,6 +23,9 @@ for (const p of [new Alexa(), new GoogleAssistant()]) {
 
                 const launchRequest3 = await testSuite.requestBuilder.intent('AskForFavColor');
                 global.responseLaunchRequest3 = await conversation.send(launchRequest3);
+
+                // clear db test file
+                await conversation.clearDb();
             });
 
             test('first response does NOT have "someData"', async () => {
@@ -59,6 +62,10 @@ for (const p of [new Alexa(), new GoogleAssistant()]) {
                 expect(
                     global.responseLaunchRequest3.hasSessionData('color')
                 ).toBe(true);
+            });
+
+            test('third response has speech from google-sheets', async () => {
+                expect(global.responseLaunchRequest3.getSpeech()).toBe('what is your fav color?');
             });
         });
 
@@ -74,6 +81,9 @@ for (const p of [new Alexa(), new GoogleAssistant()]) {
 
                 const launchRequest3 = await testSuite.requestBuilder.intent('AskForFavColor');
                 global.responseLaunchRequest3 = await conversation.send(launchRequest3);
+
+                // clear db test file
+                await conversation.clearDb();
             });
 
             test('first response does NOT have "someData"', async () => {
@@ -110,6 +120,10 @@ for (const p of [new Alexa(), new GoogleAssistant()]) {
                 expect(
                     global.responseLaunchRequest3.hasSessionData('color')
                 ).toBe(true);
+            });
+
+            test('third response has speech from google-sheets', async () => {
+                expect(global.responseLaunchRequest3.getSpeech()).toBe('what is your fav color?');
             });
         });
     });

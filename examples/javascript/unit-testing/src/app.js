@@ -61,7 +61,7 @@ app.setHandler({
     AskForFavColor() {
         this.$session.$data.color = 'not set';
 
-        this.ask('what is your fav color?');
+        this.ask(this.t('test.speech'));
     }
 });
 module.exports.app = app;
